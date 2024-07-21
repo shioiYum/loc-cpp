@@ -5,8 +5,21 @@
 #include <iostream>
 #include <string>
 
+bool hadError = false;
+
 void run(std::string source) {
     std::cout <<  source << '\n';
+}
+
+//error handeling code
+
+void report(int line, std::string where, std::string message) {
+    std::cerr << "[line "  << line << "] Error" << where << ": " << message;
+    hadError = true;    
+}
+
+void error(int line, std::string message) {
+    report(line, "", message);
 }
 
 void runFile(std::string path) {
@@ -22,6 +35,8 @@ void runFile(std::string path) {
     std::string code = buf.str();
 
     run(code);
+
+    if (hadError) exit(EXIT_FAILURE);
 }
 
 void runPrompt() {
@@ -30,6 +45,7 @@ void runPrompt() {
         std::cout << "> ";
         std::getline(std::cin, inputBuf);
         run(inputBuf);
+        hadError = false;
     }
 }
 
