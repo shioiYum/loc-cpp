@@ -4,11 +4,23 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <list>
+
+#include "error.hpp"
+#include "Scanner.hpp"
 
 bool hadError = false;
 
 void run(std::string source) {
-    std::cout <<  source << '\n';
+    Scanner scanner = Scanner(source);
+    
+    std::list<Token> tokens = scanner.scanTokens();
+
+    //do processing
+    for(Token token: tokens) {
+        std::cout << token << '\n';
+    }
+
 }
 
 //error handeling code
