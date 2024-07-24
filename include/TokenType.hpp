@@ -9,16 +9,16 @@ enum TokenType {
     //One or two character tokens.
     BANG, BANG_EQUAL, 
     EQUAL, EQUAL_EQUAL,
-    GREATER, GREATE_EQUAL,
+    GREATER, GREATER_EQUAL,
     LESS, LESS_EQUAL,
 
     //Literals
     IDENTIFIER, STRING, NUMBER,
 
-    //Keyboard.
+    //Keywords
 
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-    PRINT, RETURN, SUPER, THIS, TURN, VAR, WHILE,
+    PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
 
     EOFF
 };

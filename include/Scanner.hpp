@@ -17,6 +17,7 @@ private:
         {"and", AND},
         {"class" , CLASS},
         {"else", ELSE},
+        {"true", TRUE},
         {"false", FALSE},
         {"for", FOR},
         {"fun", FUN},

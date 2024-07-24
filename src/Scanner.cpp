@@ -1,5 +1,6 @@
 #include "Scanner.hpp"
 #include "error.hpp"
+#include <iostream>
 
 Scanner::Scanner(std::string source): source(source) {}
 
@@ -37,7 +38,7 @@ void Scanner::scanToken() {
             addToken(match('=') ? LESS_EQUAL: LESS);
             break;
         case '>':
-            addToken(match('=') ? GREATE_EQUAL: GREATER);
+            addToken(match('=') ? GREATER_EQUAL: GREATER);
             break;
         
         case '/':
@@ -94,11 +95,11 @@ char Scanner::peekNext() {
 }
 
 void Scanner::addToken(TokenType type) {
-    addToken(type, nullptr);
+    addToken(type, std::any());
 }
 
 void Scanner::addToken(TokenType type, std::any literal) {
-    std::string text = source.substr(start, current);
+    std::string text = source.substr(start, current - start);
     tokens.push_back(Token(type, text, literal, line));
 }
 
@@ -124,7 +125,7 @@ void Scanner::string(){
     //closting ".
     advance();
 
-    std::string value { source.substr(start + 1, current - 1) };
+    std::string value { source.substr(start + 1, current - 1 - start + 1) };
     addToken(STRING, value);
 }
 
@@ -152,13 +153,13 @@ void Scanner::number() {
         while(isDigit(peek())) advance();
     }
 
-    addToken(NUMBER, std::stod(source.substr(start, current)));
+    addToken(NUMBER, std::stod(source.substr(start, current - start)));
 }
 
 void Scanner::identifier() {
     while(isAlphaNumeric(peek())) advance();
 
-    std::string text = source.substr(start, current);
+    std::string text = source.substr(start, current - start);
     TokenType type;
     if(keywords.find(text) != keywords.end()) {
         type = keywords[text];
