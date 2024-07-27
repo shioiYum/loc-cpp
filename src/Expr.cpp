@@ -1,7 +1,9 @@
 #include "Expr.hpp"
 
-Binary::Binary(Expr left, Token oper, Expr right): 
-    left(left), oper(oper), right(right) {
-        
-    }
+Binary::Binary(Expr left, Token oper, Expr right) : left(left), oper(oper), right(right) {}
 
+Grouping::Grouping(Expr expression) : expression(expression) {}
+
+Literal::Literal(std::any value) : value(value) {}
+
+Unary::Unary(Token oper, Expr right) : oper(oper), right(right) {}
