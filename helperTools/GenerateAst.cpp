@@ -41,7 +41,7 @@ std::vector<std::string> split_string(std::string str, char delimeter) {
 }
 
 std::string strip_string(std::string& str){
-    int start {0}, end{str.size() - 1};
+    int start {0}, end = str.size() - 1;
     while(str[start] == ' '){
         start++;
     }
@@ -154,10 +154,13 @@ void defineAst(
    writerFileHeader.Println("#define EXPR_H");
    writerFileHeader.Println("#include \"Token.hpp\"");
    writerFileHeader.Println();
+   //TODO: Add all the classes
+   //TODO: Add Visitor
 
-   writerFileHeader.Println("class Expr { ");
+   writerFileHeader.Println("class " + basename + " { ");
    writerFileHeader.Println("public:");
    writerFileHeader.Println("virtual ~Expr() = default;");
+   //TODO: Add accept virtual method for others to implement   
    writerFileHeader.Println("};");
    writerFileHeader.Println();    
 

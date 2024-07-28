@@ -1,42 +1,53 @@
 #ifndef EXPR_H
 #define EXPR_H
 #include "Token.hpp"
+#include <iostream>
 
-class Expr
-{
+template <typename T> class Visitor;
+
+class Expr {
 public:
-    virtual ~Expr() = default;
+  class Binary;
+  class Grouping;
+
+  virtual ~Expr() = default;
+
+  template <typename T>
+  T accept(Visitor<T>& visitor){
+    return T(); 
+  }
 };
 
-class Binary : public Expr
-{
+template <typename T>
+class Visitor {
 public:
-    const Expr left;
-    const Token oper;
-    const Expr right;
-    Binary(Expr left, Token oper, Expr right);
+  virtual T visitBinary(Expr::Binary &binary) = 0;
+  virtual T visitGrouping(Expr::Grouping &grouping) = 0;
 };
 
-class Grouping : public Expr
-{
+// Nested class
+class Expr::Binary: public Expr {
 public:
-    const Expr expression;
-    Grouping(Expr expression);
+  const Expr left;
+  const Token oper;
+  const Expr right;
+
+
+  Binary(Expr left, Token oper, Expr right);
+   template <typename T>
+  T accept(Visitor<T>& visitor) {
+     return visitor.visitBinary(*this);
+     }
 };
 
-class Literal : public Expr
-{
+class Expr::Grouping: public Expr {
 public:
-    const std::any value;
-    Literal(std::any value);
-};
+  const Expr expression;
 
-class Unary : public Expr
-{
-public:
-    const Token oper;
-    const Expr right;
-    Unary(Token oper, Expr right);
+  Grouping(Expr expression);
+   template <typename T>
+  T accept(Visitor<T>& visitor) {
+     return visitor.visitGrouping(*this);
+     }
 };
-
 #endif
