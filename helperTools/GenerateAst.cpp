@@ -112,8 +112,10 @@ void defineType(
             }            
         }
         writer.Println(");");
-
-        writer.Println("};");
+        writer.Println("template <typename T>");
+        writer.Println("T accept(Visitor<T>& visitor) { ");
+        writer.Println("return visitor.visit"+className+"(*this);");
+        writer.Println("}\n};");
         writer.Println();
 
         //For cpp file
@@ -153,20 +155,47 @@ void defineAst(
    writerFileHeader.Println("#ifndef EXPR_H");
    writerFileHeader.Println("#define EXPR_H");
    writerFileHeader.Println("#include \"Token.hpp\"");
+   writerFileHeader.Println("#include <iostream>");
    writerFileHeader.Println();
-   //TODO: Add all the classes
-   //TODO: Add Visitor
+
+   //template class for visitor
+   writerFileHeader.Println("template <typename T> class Visitor;");
+   writerFileHeader.Println();
+
+   
 
    writerFileHeader.Println("class " + basename + " { ");
    writerFileHeader.Println("public:");
+
+   for(std::string type: types) { 
+        std::vector<std::string> splitted_types = split_string(type, '|');
+        std::string className =  strip_string(splitted_types[0]);
+        writerFileHeader.Println("class " + className + ";");
+   }
+
+   writerFileHeader.Println();
    writerFileHeader.Println("virtual ~Expr() = default;");
-   //TODO: Add accept virtual method for others to implement   
-   writerFileHeader.Println("};");
+   writerFileHeader.Println("template <typename T>");
+   writerFileHeader.Println("T accept(Visitor<T>& visitor){");
+   writerFileHeader.Println("return T(); ");
+   writerFileHeader.Println("}\n};");
    writerFileHeader.Println();    
+
+   writerFileHeader.Println("template <typename T>\nclass Visitor {\npublic:");
+   for(std::string type: types) { 
+        std::vector<std::string> splitted_types = split_string(type, '|');
+        std::string className =  strip_string(splitted_types[0]);
+        writerFileHeader.Println("virtual T visit" + className + "(" + basename+"::"+className+" &visitor) = 0;");        
+   }
+    writerFileHeader.Println("};");
+    writerFileHeader.Println();
+
 
    //for cpp file
    writerFileCpp.Println("#include \""+basename+".hpp\"");
+   writerFileCpp.Println("#include \"Token.hpp\"");
    writerFileCpp.Println();
+
 
    for(std::string type: types) {
         std::vector<std::string> splitted_types = split_string(type, '|');
