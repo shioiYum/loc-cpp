@@ -61,7 +61,7 @@ void runPrompt() {
     }
 }
 
-int main(int argc, char * argv[]) {
+/*int main(int argc, char * argv[]) {
     if(argc > 2)     {
         std::cout << "Usage: cpplox [script]\n";
         exit(EXIT_FAILURE);
@@ -70,5 +70,5 @@ int main(int argc, char * argv[]) {
     } else {
         runPrompt();
     }
-}          
+}*/          
 

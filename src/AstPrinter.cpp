@@ -1,3 +1,4 @@
+#include <any>
 #include <iostream>
 #include "Expr.hpp"
 
@@ -5,44 +6,49 @@ class AstPrinter : public Visitor<std::string>
 {
 public:
     template <typename T>
-    std::string print(Expr<T> expr)
+    std::string print(Expr<T>* expr)
     {
-        return expr.accept(*this);
+        return expr -> accept(*this);
     }
 
-    std::string visit(Binary &expr)
+    std::string visit(Binary &expr) override
     {
         return parenthesize(expr.oper.lexeme, expr.left, expr.right);
     }
-    std::string visit(Grouping &expr)
+
+    std::string visit(Grouping &expr) override
     {
         return parenthesize("group", expr.expression);
     }
-    std::string visit(Literal &expr)
+
+    std::string visit(Literal &expr) override
     {
-        if (!expr.value.has_value())
-        {
-            return "nil";
+        if(expr.value.has_value()){
+            std::string value =  std::any_cast<std::string>(expr.value);
+            std::cout << value << "\n";
         }
-        return std::any_cast<std::string>(expr.value);
+
+        return "";
     }
-    std::string visit(Unary &expr)
+
+    std::string visit(Unary &expr) override
     {
         return parenthesize(expr.oper.lexeme, expr.right);
     }
 
+private:
     template <typename T>
     std::string parenthesize(std::string name, Expr<T> exprs, ...)
     {
         std::string final_string = "(" + name;
-
-        for (Expr<T> expr : exprs)
-        {
-            final_string + " ";
-            final_string + exprs.accept(*this);
-        }
-        final_string + ")";
-
         return final_string;
     }
 };
+
+int main()
+{   
+    Expr<Literal> * expression = new Literal(12);
+    AstPrinter printer;
+    std::cout << printer.print(expression) << "\n";
+    return 0;
+}
