@@ -1,3 +1,4 @@
+#include "Literal.hpp"
 #include "TokenType.hpp"
 #include "Token.hpp"
 #include <string>
@@ -5,7 +6,7 @@
 
 Token::Token(TokenType type, 
             std::string lexeme, 
-            std::any literal, 
+            LiteralData literal, 
             int line): type(type), lexeme(lexeme), literal(literal), line(line)
  {}
 

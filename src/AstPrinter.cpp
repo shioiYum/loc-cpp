@@ -1,6 +1,8 @@
 #include <any>
 #include <iostream>
+#include <string>
 #include "Expr.hpp"
+#include "Literal.hpp"
 
 class AstPrinter : public Visitor<std::string>
 {
@@ -13,7 +15,7 @@ public:
 
     std::string visit(Binary &expr) override
     {
-        return parenthesize(expr.oper.lexeme, expr.left, expr.right);
+      return parenthesize(expr.oper.lexeme, expr.left, expr.right);
     }
 
     std::string visit(Grouping &expr) override
@@ -23,12 +25,16 @@ public:
 
     std::string visit(Literal &expr) override
     {
-        if(expr.value.has_value()){
-            std::string value =  std::any_cast<std::string>(expr.value);
-            std::cout << value << "\n";
-        }
+      if(expr.value.type == LiteralData::DataType::EMPTY)
+	{
+	  return "nil";
+	}
 
-        return "";
+      if(expr.value.type == LiteralData::DataType::STRING) {
+	return *static_cast<std::string*>(expr.value.value);
+      }
+
+      return std::to_string(*static_cast<int*>(expr.value.value));
     }
 
     std::string visit(Unary &expr) override
@@ -37,18 +43,36 @@ public:
     }
 
 private:
-    template <typename T>
-    std::string parenthesize(std::string name, Expr<T> exprs, ...)
-    {
-        std::string final_string = "(" + name;
-        return final_string;
-    }
+
+  std::string parenthesize_impl(std::string final_string)
+  {
+    return final_string + ")";
+  }
+  
+  template <typename T, typename... Args>
+  std::string parenthesize_impl(std::string final_string, Expr<T>& first, Args&... args )
+  {
+    final_string += " " + first -> accept(*this);
+  }
+
+  template <typename T, typename... Args>
+  std::string parenthesize(std::string name, Expr<T> first, Args... args)
+  {
+    std::string final_string = "(" + name;
+    final_string = parenthesize(final_string, first, args...);
+    return final_string;
+  }
 };
 
 int main()
-{   
-    Expr<Literal> * expression = new Literal(12);
-    AstPrinter printer;
-    std::cout << printer.print(expression) << "\n";
-    return 0;
+{
+  int val2 = 1;
+  int* pointer2 = &val2;
+  LiteralData litData(pointer2, LiteralData::DataType::INT);
+  Expr<Literal> * expression2 = new Literal(litData);
+  
+  AstPrinter printer;
+  // std::cout << printer.print(expression) << "\n";
+  std::cout << printer.print(expression2) << "\n";
+  return 0;
 }

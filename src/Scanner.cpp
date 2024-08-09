@@ -1,4 +1,5 @@
 #include "Scanner.hpp"
+#include "Literal.hpp"
 #include "error.hpp"
 #include <iostream>
 
@@ -8,8 +9,9 @@ std::list<Token> Scanner::scanTokens() {
     while (!isAtEnd()){
         start = current;
         scanToken();
-    }    
-    tokens.push_back(Token(TokenType::EOFF, "", std::any{}, line));
+    }
+    LiteralData literalData;
+    tokens.push_back(Token(TokenType::EOFF, "", literalData, line));
     return tokens;
 }
 
@@ -95,11 +97,13 @@ char Scanner::peekNext() {
 }
 
 void Scanner::addToken(TokenType type) {
-    addToken(type, std::any());
+  LiteralData nullLiteral;
+    addToken(type, nullLiteral);
 }
 
-void Scanner::addToken(TokenType type, std::any literal) {
+void Scanner::addToken(TokenType type, LiteralData literal) {
     std::string text = source.substr(start, current - start);
+
     tokens.push_back(Token(type, text, literal, line));
 }
 
@@ -126,7 +130,9 @@ void Scanner::string(){
     advance();
 
     std::string value { source.substr(start + 1, current - 1 - start + 1) };
-    addToken(STRING, value);
+    std::string * pointer = &value;
+    LiteralData stringLiteral(pointer, LiteralData::DataType::STRING);
+    addToken(STRING, stringLiteral);
 }
 
 bool Scanner::isDigit(char c) {
@@ -152,8 +158,10 @@ void Scanner::number() {
 
         while(isDigit(peek())) advance();
     }
-
-    addToken(NUMBER, std::stod(source.substr(start, current - start)));
+    int number = std::stod(source.substr(start, current - start));
+    int * pointer = &number;
+    LiteralData integerLiteral(pointer, LiteralData::DataType::INT);
+    addToken(NUMBER, integerLiteral);
 }
 
 void Scanner::identifier() {

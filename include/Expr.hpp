@@ -1,5 +1,6 @@
 #ifndef EXPR_H
 #define EXPR_H
+#include "Literal.hpp"
 #include "Token.hpp"
 #include <any>
 #include <iostream>
@@ -39,8 +40,9 @@ public:
 class Literal : public Expr<Literal>
 {
 public:
-    const std::any value;
-    Literal(std::any value);
+  LiteralData value;
+  Literal( LiteralData value);
+
 };
 
 class Unary : public Expr<Unary>
