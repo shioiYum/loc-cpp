@@ -48,9 +48,9 @@ public:
 class Unary : public Expr<Unary>
 {
 public:
-    const Token oper;
-    const Expr right;
-    Unary(Token oper, Expr right);
+    Token oper;
+    Expr * right;
+    Unary(Token oper, Expr * right);
 };
 
 

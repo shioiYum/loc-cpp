@@ -3,6 +3,8 @@
 #include <string>
 #include "Expr.hpp"
 #include "Literal.hpp"
+#include "Token.hpp"
+#include "TokenType.hpp"
 
 class AstPrinter : public Visitor<std::string>
 {
@@ -66,13 +68,21 @@ private:
 
 int main()
 {
-  int val2 = 1;
-  int* pointer2 = &val2;
-  LiteralData litData(pointer2, LiteralData::DataType::INT);
-  Expr<Literal> * expression2 = new Literal(litData);
-  
+  std::string minus = "-";
+  std::string *minus_pointe = &minus;
+  LiteralData minuSign(minus_pointe, LiteralData::DataType::STRING);
+
+  int number123 = 123;
+  int *number123_pointe = &number123;
+  LiteralData intSign(number123_pointe, LiteralData::DataType::INT);
+
+  Token token(TokenType::MINUS, "-", minuSign, 1);
+  Expr<Literal> * lit = new  Literal(intSign);
+
+  Expr<Unary> * exp = new Unary(token, lit);
+
   AstPrinter printer;
   // std::cout << printer.print(expression) << "\n";
-  std::cout << printer.print(expression2) << "\n";
+  std::cout << printer.print(exp) << "\n";
   return 0;
 }

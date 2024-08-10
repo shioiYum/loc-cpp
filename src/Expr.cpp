@@ -10,6 +10,6 @@ expression(expression) { }
 
 Literal::Literal(LiteralData value) : value(value) {}
 
-Unary::Unary(Token oper, Expr right): 
+Unary::Unary(Token oper, Expr* right): 
 oper(oper), right(right) { }
 
