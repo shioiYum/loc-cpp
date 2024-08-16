@@ -2,6 +2,7 @@
 #include "ExprVisitor.h"
 #include "Token.hpp"
 #include <any>
+#include <cstdio>
 #include <memory>
 
 //For Binary Expression
