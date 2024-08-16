@@ -1,88 +1,53 @@
 #include <any>
+#include <cstdio>
 #include <iostream>
 #include <string>
-#include "Expr.hpp"
-#include "Literal.hpp"
+
 #include "Token.hpp"
-#include "TokenType.hpp"
+#include "Expr.hpp"
+#include "ExprVisitor.h"
 
-class AstPrinter : public Visitor<std::string>
-{
+
+class AbstractTreePrinter: ExprVisitor<std::any> {
 public:
-    template <typename T>
-    std::string print(Expr<T>* expr)
-    {
-        return expr -> accept(*this);
+  std::string print(Expr& expr) {
+    return std::any_cast<std::string>(expr.accept(*this));
+  }
+
+  std::any visitBinaryExpr(const BinaryExpr& expr) override {
+    return parenthesize(expr.getToken().lexeme, expr.getLeftExpr(), expr.getRightExpr());
+  }
+
+  std::any visitLiteralExpr(const LiteralExpr& expr) override {
+      std::any literalValue = expr.getLiteralValue();
+      if(literalValue.has_value())
+	return "nil";
+
+      return parenthesize(std::any_cast<std::string>(literalValue));
     }
 
-    std::string visit(Binary &expr) override
-    {
-      return parenthesize(expr.oper.lexeme, expr.left, expr.right);
+    std::any visitGroupingExpr(const GroupingExpr& expr) override {
+      return parenthesize("group", expr.getExpression());
     }
 
-    std::string visit(Grouping &expr) override
-    {
-        return parenthesize("group", expr.expression);
-    }
-
-    std::string visit(Literal &expr) override
-    {
-      if(expr.value.type == LiteralData::DataType::EMPTY)
-	{
-	  return "nil";
-	}
-
-      if(expr.value.type == LiteralData::DataType::STRING) {
-	return *static_cast<std::string*>(expr.value.value);
-      }
-
-      return std::to_string(*static_cast<int*>(expr.value.value));
-    }
-
-    std::string visit(Unary &expr) override
-    {
-        return parenthesize(expr.oper.lexeme, expr.right);
-    }
+  std::any visitUnaryExpr(const UnaryExpr& expr) override {
+    return parenthesize(expr.getToken().lexeme, expr.getRight());
+  }
 
 private:
-
-  std::string parenthesize_impl(std::string final_string)
-  {
-    return final_string + ")";
-  }
-  
-  template <typename T, typename... Args>
-  std::string parenthesize_impl(std::string final_string, Expr<T>& first, Args&... args )
-  {
-    final_string += " " + first -> accept(*this);
-  }
-
-  template <typename T, typename... Args>
-  std::string parenthesize(std::string name, Expr<T> first, Args... args)
-  {
-    std::string final_string = "(" + name;
-    final_string = parenthesize(final_string, first, args...);
-    return final_string;
-  }
+    template<typename... Args>
+    std::string parenthesize(const std::string& name, const Args&... exprs){
+        std::string result = "(" + name;
+        ((result += " " + std::any_cast<std::string>(exprs.accept(*this))), ...);
+        result += ")";
+        return result;
+    }
 };
 
-int main()
-{
-  std::string minus = "-";
-  std::string *minus_pointe = &minus;
-  LiteralData minuSign(minus_pointe, LiteralData::DataType::STRING);
+int main() {
+  Expr * expr = new LiteralExpr("12");
+  AbstractTreePrinter atp;
+  std::cout << atp.print(*expr) << "\n";
 
-  int number123 = 123;
-  int *number123_pointe = &number123;
-  LiteralData intSign(number123_pointe, LiteralData::DataType::INT);
-
-  Token token(TokenType::MINUS, "-", minuSign, 1);
-  Expr<Literal> * lit = new  Literal(intSign);
-
-  Expr<Unary> * exp = new Unary(token, lit);
-
-  AstPrinter printer;
-  // std::cout << printer.print(expression) << "\n";
-  std::cout << printer.print(exp) << "\n";
-  return 0;
 }
+

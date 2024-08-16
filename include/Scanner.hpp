@@ -4,7 +4,6 @@
 #include <string>
 #include <list>
 #include <unordered_map>
-#include "Literal.hpp"
 #include "Token.hpp"
 
 class Scanner {
@@ -45,11 +44,11 @@ private:
     bool isAlphaNumeric(char);
 
 
-    void number();
-    void identifier();
-    void addToken(TokenType type);
-    void addToken(TokenType type, LiteralData literal);
-    bool match(char expected);
+  void number();
+  void identifier();
+  void addToken(TokenType type);
+  void addToken(TokenType type, std::any literal);
+  bool match(char expected);
 
 
 public:

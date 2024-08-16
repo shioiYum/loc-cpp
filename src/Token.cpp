@@ -1,15 +1,13 @@
-#include "Literal.hpp"
 #include "TokenType.hpp"
 #include "Token.hpp"
 #include <string>
 #include <any>
 
-Token::Token(TokenType type, 
-            std::string lexeme, 
-            LiteralData literal, 
-            int line): type(type), lexeme(lexeme), literal(literal), line(line)
- {}
+Token::Token(TokenType type, std::string lexeme, std::any literal, int line)
+    : type(type), lexeme(lexeme), literal(literal), line(line) {}
 
+Token::Token(TokenType type, std::string lexeme, int line):
+  type(type), lexeme(lexeme), line(line){}
 
 std::ostream& operator<<(std::ostream& out, const Token& token) {
     std::string type_string;
