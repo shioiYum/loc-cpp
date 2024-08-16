@@ -1,67 +1,65 @@
 #ifndef EXPR_H
 #define EXPR_H
-#include "Literal.hpp"
+
 #include "Token.hpp"
 #include <any>
 #include <iostream>
+#include <memory>
+#include "ExprVisitor.h"
 
-template <typename T>
-class Visitor;
-
-
-template <typename T>
 class Expr
 {
 public:
-    virtual ~Expr() = default;
-    template <typename R>
-    auto accept(Visitor<R> &visitor) {
-        return visitor.visit(*static_cast<T *>(this));
-    }
+  virtual ~Expr() = default;
+
+  virtual std::any accept(ExprVisitor<std::any>& visitor) const = 0;
 };
 
+class BinaryExpr: public Expr {
+  public:
+  BinaryExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right);
+  std::any accept(ExprVisitor<std::any>& visitor) const override;
 
-class Binary : public Expr<Binary>
-{
-public:
-    const Expr left;
-    const Token oper;
-    const Expr right;
-    Binary(Expr left, Token oper, Expr right);
+  const Expr& getLeftExpr() const { return *left; }
+  const Token getToken() const {return op; }
+  const Expr& getRightExpr() const { return *right; }
+  private:
+  std::unique_ptr<Expr> left;
+  Token op;
+  std::unique_ptr<Expr> right;
 };
 
-class Grouping : public Expr<Grouping>
-{
-public:
-    const Expr expression;
-    Grouping(Expr expression);
+class GroupingExpr: public Expr {
+  public:
+  GroupingExpr(std::unique_ptr<Expr> expression);
+  std::any accept(ExprVisitor<std::any>& visitor) const override;
+
+  const Expr& getExpression() const{ return *expression;}
+  private:
+  std::unique_ptr<Expr> expression;
 };
 
-class Literal : public Expr<Literal>
-{
+class LiteralExpr: public Expr {
 public:
-  LiteralData value;
-  Literal( LiteralData value);
+  LiteralExpr(std::any value);
+  std::any accept(ExprVisitor<std::any> &visitor) const override;
 
+  const std::any& getLiteralValue() const {return value; }
+  
+  private:
+  std::any value;
 };
 
-class Unary : public Expr<Unary>
-{
+class UnaryExpr: public Expr {
 public:
-    Token oper;
-    Expr * right;
-    Unary(Token oper, Expr * right);
-};
+  UnaryExpr(Token op, std::unique_ptr<Expr> right);
+  std::any accept(ExprVisitor<std::any> &visitor) const override;
 
-
-template <typename T>
-class Visitor
-{
-public:
-    virtual T visit(Binary &visitor) = 0;
-    virtual T visit(Grouping &visitor) = 0;
-    virtual T visit(Literal &visitor) = 0;
-    virtual T visit(Unary &visitor) = 0;
+  Token getToken() const { return op;}
+  const Expr& getRight() const  { return *right; }
+private:
+  Token op;
+  std::unique_ptr<Expr> right;
 };
 
 #endif

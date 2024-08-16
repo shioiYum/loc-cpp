@@ -1,15 +1,43 @@
 #include "Expr.hpp"
-#include "Literal.hpp"
+#include "ExprVisitor.h"
 #include "Token.hpp"
+#include <any>
+#include <cstdio>
+#include <memory>
 
-Binary::Binary(Expr left, Token oper, Expr right): 
-left(left), oper(oper), right(right) { }
+//For Binary Expression
 
-Grouping::Grouping(Expr expression): 
-expression(expression) { }
+BinaryExpr::BinaryExpr(std::unique_ptr<Expr> left, Token op,
+                       std::unique_ptr<Expr> right)
+    : left(std::move(left)), op(op), right(std::move(right)){};
 
-Literal::Literal(LiteralData value) : value(value) {}
 
-Unary::Unary(Token oper, Expr* right): 
-oper(oper), right(right) { }
+std::any BinaryExpr::accept(ExprVisitor<std::any> &visitor) const  {
+  return visitor.visitBinaryExpr(*this);
+}
 
+// for groupingexpr
+
+GroupingExpr::GroupingExpr(std::unique_ptr<Expr> expression)
+    : expression(std::move(expression)){};
+
+std::any GroupingExpr::accept(ExprVisitor<std::any> &visitor) const {
+  return visitor.visitGroupingExpr(*this);
+}
+
+// For literalexpr
+
+LiteralExpr::LiteralExpr(std::any value) : value(value){};
+
+std::any LiteralExpr::accept(ExprVisitor<std::any> &visitor) const{
+  return visitor.visitLiteralExpr(*this);
+}
+
+// for unaryexpr
+
+UnaryExpr::UnaryExpr(Token op, std::unique_ptr<Expr> right)
+    : op(op), right(std::move(right)){};
+
+std::any UnaryExpr::accept(ExprVisitor<std::any> &visitor) const {
+  return visitor.visitUnaryExpr(*this);
+}

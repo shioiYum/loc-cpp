@@ -1,88 +1,92 @@
 #include <any>
+#include <cstdio>
 #include <iostream>
+#include <memory>
 #include <string>
-#include "Expr.hpp"
-#include "Literal.hpp"
+#include <cmath>
 #include "Token.hpp"
+#include "Expr.hpp"
+#include "ExprVisitor.h"
 #include "TokenType.hpp"
 
-class AstPrinter : public Visitor<std::string>
-{
+
+class AbstractTreePrinter: ExprVisitor<std::any> {
 public:
-    template <typename T>
-    std::string print(Expr<T>* expr)
-    {
-        return expr -> accept(*this);
+  std::string print(Expr& expr) {
+    std::any val = expr.accept(*this);
+    return std::any_cast<std::string>(val);
+  }
+
+  std::any visitBinaryExpr(const BinaryExpr& expr) override {
+    return parenthesize(expr.getToken().lexeme, expr.getLeftExpr(), expr.getRightExpr());
+  }
+
+  std::any visitLiteralExpr(const LiteralExpr& expr) override {
+    return parenthesize(stringify(expr.getLiteralValue()));
     }
 
-    std::string visit(Binary &expr) override
-    {
-      return parenthesize(expr.oper.lexeme, expr.left, expr.right);
+    std::any visitGroupingExpr(const GroupingExpr& expr) override {
+      return parenthesize("group", expr.getExpression());
     }
 
-    std::string visit(Grouping &expr) override
-    {
-        return parenthesize("group", expr.expression);
-    }
-
-    std::string visit(Literal &expr) override
-    {
-      if(expr.value.type == LiteralData::DataType::EMPTY)
-	{
-	  return "nil";
-	}
-
-      if(expr.value.type == LiteralData::DataType::STRING) {
-	return *static_cast<std::string*>(expr.value.value);
-      }
-
-      return std::to_string(*static_cast<int*>(expr.value.value));
-    }
-
-    std::string visit(Unary &expr) override
-    {
-        return parenthesize(expr.oper.lexeme, expr.right);
-    }
+  std::any visitUnaryExpr(const UnaryExpr& expr) override {
+    return parenthesize(expr.getToken().lexeme, expr.getRight());
+  }
 
 private:
 
-  std::string parenthesize_impl(std::string final_string)
-  {
-    return final_string + ")";
+  std::string stringify(const std::any& object) {
+    if(!object.has_value()) {
+      return "nil";
+    }
+
+    if(object.type() == typeid(bool)) {
+      return std::any_cast<bool>(object) ? "true": "false";
+    }
+
+    if(object.type() == typeid(double)) {
+      double n = std::any_cast<double>(object);
+      if (std::trunc(n) == n) {
+	return std::to_string((int) n);
+      } else {
+	return std::to_string(n);
+      }
+    }
+
+    if (object.type() == typeid(std::string)) {
+      return std::any_cast<std::string>(object);
+    }
+    return "";
   }
   
-  template <typename T, typename... Args>
-  std::string parenthesize_impl(std::string final_string, Expr<T>& first, Args&... args )
-  {
-    final_string += " " + first -> accept(*this);
-  }
-
-  template <typename T, typename... Args>
-  std::string parenthesize(std::string name, Expr<T> first, Args... args)
-  {
-    std::string final_string = "(" + name;
-    final_string = parenthesize(final_string, first, args...);
-    return final_string;
-  }
+    template<typename... Args>
+    std::string parenthesize(const std::string& name, const Args&... exprs){
+        std::string result = "(" + name;
+	((result += " " + stringify(exprs.accept(*this))), ...);
+        result += ")";
+        return result;
+    }
 };
 
-int main()
-{
-  std::string minus = "-";
-  std::string *minus_pointe = &minus;
-  LiteralData minuSign(minus_pointe, LiteralData::DataType::STRING);
+int main() {
+  Expr * expr = new BinaryExpr(std::unique_ptr<Expr>(new LiteralExpr(123.0)), Token(TokenType::MINUS, "-", 1), std::unique_ptr<Expr>(new LiteralExpr(123.0)));
 
-  int number123 = 123;
-  int *number123_pointe = &number123;
-  LiteralData intSign(number123_pointe, LiteralData::DataType::INT);
+  Expr * expr2 = new BinaryExpr(
+				std::unique_ptr<Expr>(new UnaryExpr(
+								    Token(TokenType::MINUS, "-", 1),
+								    std::unique_ptr<Expr>(new LiteralExpr(123.0))
+								    )),
+				Token(TokenType::STAR, "*", 1),
+				std::unique_ptr<Expr>(new GroupingExpr(
+								       std::unique_ptr<Expr>(new LiteralExpr(45.67))
+								       )
+						      )
+				);
+  
+  AbstractTreePrinter atp;
+  std::cout << atp.print(*expr) << "\n";
+  std::cout << atp.print(*expr2) << "\n";
 
-  Token token(TokenType::MINUS, "-", minuSign, 1);
-  Expr<Literal> * lit = new  Literal(intSign);
-
-  Expr<Unary> * exp = new Unary(token, lit);
-
-  AstPrinter printer;
-  // std::cout << printer.print(expression) << "\n";
-  std::cout << printer.print(exp) << "\n";
-  return 0;
 }
+
+
