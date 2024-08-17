@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-Parser::Parser(std::vector<Token> &tokens) : tokens(tokens){};
+Parser::Parser(std::vector<Token>& tokens): tokens(tokens) {}
 
 Expr * Parser::parse() {
   try {
@@ -78,7 +78,7 @@ Expr * Parser::primary() {
     return new GroupingExpr(std::unique_ptr<Expr>(expr));
   }
 
-  throw error(peek(), "Expect expression. ");
+  throw parsererror(peek(), "Expect expression. ");
 }
 
 
@@ -100,7 +100,7 @@ Expr * Parser::term() {
 Expr * Parser::factor() {
   Expr * expr = unary();
 
-  while(match(TokenType::SLASH, TokenType::SEMICOLON)) {
+  while(match(TokenType::SLASH, TokenType::STAR)) {
     Token op = previous();
     Expr * right = unary();
     expr = new BinaryExpr(std::unique_ptr<Expr>(expr),
@@ -113,13 +113,8 @@ Expr * Parser::factor() {
 
 
 template <typename... TokenType>
-bool Parser::match(const TokenType&... tokenTypes) {
-    for (const auto& type : tokenTypes) {
-        if (matchToken(type)) {
-            return true;
-        }
-    }
-    return false;
+bool Parser::match(const TokenType&... tokentypes) {
+  return (matchToken(tokentypes) || ...);
 }
 
 
@@ -135,11 +130,11 @@ bool Parser::matchToken(const TokenType &tokenType) {
 Token Parser::consume(TokenType type, std::string message) {
   if(match(type)) return advance();
 
-  throw error(peek(), message);
+  throw parsererror(peek(), message);
 }
 
 
-Parser::ParseError Parser::error(Token token, std::string message) {
+Parser::ParseError Parser::parsererror(Token token, std::string message) {
   error(token, message);
   return ParseError();
 }
