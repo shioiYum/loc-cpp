@@ -1,3 +1,7 @@
 build/
 .vscode/
 TODO.md
+.cache
+CMakeLists.txt.user	
+debugtemp
+

@@ -68,7 +68,7 @@ private:
     }
 };
 
-int main() {
+/*int main() {
   Expr * expr = new BinaryExpr(std::unique_ptr<Expr>(new LiteralExpr(123.0)), Token(TokenType::MINUS, "-", 1), std::unique_ptr<Expr>(new LiteralExpr(123.0)));
 
   Expr * expr2 = new BinaryExpr(
@@ -88,5 +88,5 @@ int main() {
   std::cout << atp.print(*expr2) << "\n";
 
 }
-
+*/
 

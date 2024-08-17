@@ -2,7 +2,7 @@
 #define SCANNER_H
 
 #include <string>
-#include <list>
+#include <vector>
 #include <unordered_map>
 #include "Token.hpp"
 
@@ -53,11 +53,11 @@ private:
 
 public:
     const std::string source;
-    std::list<Token> tokens;
+    std::vector<Token> tokens;
 
     Scanner(std::string source);
 
-    std::list<Token> scanTokens();
+    std::vector<Token> scanTokens();
 };
 
 #endif
