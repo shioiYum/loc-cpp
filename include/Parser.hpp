@@ -39,7 +39,7 @@ private:
   bool isAtEnd();
   Token previous();
   Token consume(TokenType type, std::string message);
-  ParseError error(Token token, std::string message);
+  ParseError parsererror(Token token, std::string message);
 
   void synchronize();
   

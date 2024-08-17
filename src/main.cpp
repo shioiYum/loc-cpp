@@ -31,14 +31,14 @@ void run(std::string source) {
 
     //printing
     AbstractTreePrinter printer;
-    std::cout << printer.print(*expr);
+    std::cout << printer.print(*expr) << "\n";
 
 
 }
 
 //error handeling code
 void report(int line, std::string where, std::string message) {
-    std::cerr << "[line "  << line << "] Error" << where << ": " << message;
+    std::cerr << "[line "  << line << "] Error" << where << ": " << message << "\n";
     hadError = true;    
 }
 

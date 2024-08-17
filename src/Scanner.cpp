@@ -90,7 +90,7 @@ char Scanner::peek() {
 }
 
 char Scanner::peekNext() {
-    if(source[current + 1] >= source.size()) return '\0';
+    if(current + 1 >= source.size()) return '\0';
     return source[current + 1];
 }
 
@@ -145,15 +145,17 @@ bool Scanner::isAlphaNumeric(char c) {
 }
 
 void Scanner::number() {
+    char c = peek();
     while (isDigit(peek())) advance();
-
+    c = peek();
+    c = peekNext();
     //look for a fractional part
     if (peek() == '.' && isDigit(peekNext())) {
         advance();
 
         while(isDigit(peek())) advance();
     }
-    int number = std::stod(source.substr(start, current - start));
+    double number = std::stod(source.substr(start, current - start));
     addToken(NUMBER, number);
 }
 
