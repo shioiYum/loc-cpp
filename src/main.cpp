@@ -5,33 +5,51 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <vector>
 
+#include "Parser.hpp"
+#include "TokenType.hpp"
 #include "error.hpp"
 #include "Scanner.hpp"
+
+#include "AstPrinter.cpp"
+
 
 bool hadError = false;
 
 void run(std::string source) {
     Scanner scanner = Scanner(source);
-    
-    std::list<Token> tokens = scanner.scanTokens();
 
-    //do processing
-    for(Token token: tokens) {
-        std::cout << token << '\n';
-    }
+    std::vector<Token> tokens = scanner.scanTokens();
+
+    Parser * parser = new Parser(tokens);
+
+    Expr * expr = parser -> parse();
+
+    if(hadError) return;
+
+
+    //printing
+    AbstractTreePrinter printer;
+    std::cout << printer.print(*expr);
+
 
 }
 
 //error handeling code
-
 void report(int line, std::string where, std::string message) {
     std::cerr << "[line "  << line << "] Error" << where << ": " << message;
     hadError = true;    
 }
 
-void error(int line, std::string message) {
-    report(line, "", message);
+void error(int line, std::string message) { report(line, "", message); }
+
+void error(Token token, std::string message) {
+  if(token.type == TokenType::EOFF) {
+    report(token.line, " at end", message);
+  } else {
+    report(token.line, " at '" + token.lexeme + "' ", message);
+  }
 }
 
 void runFile(std::string path) {
@@ -61,7 +79,7 @@ void runPrompt() {
     }
 }
 
-/*int main(int argc, char * argv[]) {
+int main(int argc, char * argv[]) {
     if(argc > 2)     {
         std::cout << "Usage: cpplox [script]\n";
         exit(EXIT_FAILURE);
@@ -70,5 +88,5 @@ void runPrompt() {
     } else {
         runPrompt();
     }
-}*/          
+}
 

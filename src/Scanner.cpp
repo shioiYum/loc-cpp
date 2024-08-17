@@ -4,12 +4,12 @@
 
 Scanner::Scanner(std::string source): source(source) {}
 
-std::list<Token> Scanner::scanTokens() {
+std::vector<Token> Scanner::scanTokens() {
     while (!isAtEnd()){
         start = current;
         scanToken();
     }
-    tokens.push_back(Token(TokenType::EOFF, "",line));
+    tokens.emplace_back(Token(TokenType::EOFF, "",line));
     return tokens;
 }
 
@@ -59,7 +59,7 @@ void Scanner::scanToken() {
             line++;
             break;
 
-        //handle strings
+        //handlnne strings
         case '"': string(); break;
 
         default:
@@ -96,12 +96,12 @@ char Scanner::peekNext() {
 
 void Scanner::addToken(TokenType type) {
   std::string text = source.substr(start, current - start);
-  tokens.push_back(Token(type, text, line));
+  tokens.emplace_back(Token(type, text, line));
 }
 
 void Scanner::addToken(TokenType type, std::any literal) {
     std::string text = source.substr(start, current - start);
-    tokens.push_back(Token(type, text, literal, line));
+    tokens.emplace_back(Token(type, text, literal, line));
 }
 
 bool Scanner::match(char expected) {
