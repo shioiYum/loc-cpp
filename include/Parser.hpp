@@ -12,7 +12,7 @@
 class Parser {
 public:
   Parser(std::vector<Token>& tokens);
-  ~Parser();
+    ~Parser() = default;
   Expr * parse();
   Expr * expression();
   Expr *  equality();
@@ -27,7 +27,7 @@ public:
   
 private:
   std::vector<Token> tokens;
-  int current;
+    int current = 0;
 
   template<typename... TokenType>
   bool match(const TokenType&... tokentypes);

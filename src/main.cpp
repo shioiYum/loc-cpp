@@ -18,7 +18,7 @@
 bool hadError = false;
 
 void run(std::string source) {
-    Scanner scanner = Scanner(source);
+    Scanner scanner(source);
 
     std::vector<Token> tokens = scanner.scanTokens();
 
@@ -26,14 +26,20 @@ void run(std::string source) {
 
     Expr * expr = parser -> parse();
 
-    if(hadError) return;
+    if(hadError) {
+        delete parser;
+        delete expr;
+        return;
+    }
 
 
     //printing
     AbstractTreePrinter printer;
     std::cout << printer.print(*expr) << "\n";
 
-
+    //free
+    delete parser;
+    delete expr;
 }
 
 //error handeling code
